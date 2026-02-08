@@ -24,26 +24,38 @@
 <div id="status">En attente...</div>
 <script>
 var MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/fbnrw6wdqfu3yd2e0gkqha5qukf1jfas';
+var currentProps = {};
 
 PandaBridge.init(function( ) {
-    PandaBridge.listen('lancerAnalyse', function(args) {
-        var params = args[0] || {};
+    PandaBridge.onLoad(function(data) {
+        currentProps = data.properties || {};
+        console.log('Propriétés chargées:', JSON.stringify(currentProps));
+    });
+
+    PandaBridge.onUpdate(function(data) {
+        currentProps = data.properties || {};
+        console.log('Propriétés mises à jour:', JSON.stringify(currentProps));
+    });
+
+    PandaBridge.listen('lancerAnalyse', function() {
         var status = document.getElementById('status');
         status.textContent = 'Analyse en cours...';
         status.className = 'loading';
 
         var payload = {
-            latitude: params.latitude || '',
-            longitude: params.longitude || '',
-            ville: params.ville || '',
-            composition: params.composition || '',
-            duree: params.duree || '',
-            mobilite: params.mobilite || '',
-            type_scenario: params.type_scenario || '',
-            pauses: params.pauses || '',
-            mood: params.mood || '',
-            nombre_personnes: params.nombre_personnes || ''
+            latitude: currentProps.latitude || '',
+            longitude: currentProps.longitude || '',
+            ville: currentProps.ville || '',
+            composition: currentProps.composition || '',
+            duree: currentProps.duree || '',
+            mobilite: currentProps.mobilite || '',
+            type_scenario: currentProps.type_scenario || '',
+            pauses: currentProps.pauses || '',
+            mood: currentProps.mood || '',
+            nombre_personnes: currentProps.nombre_personnes || ''
         };
+
+        console.log('Envoi vers Make.com:', JSON.stringify(payload));
 
         fetch(MAKE_WEBHOOK_URL, {
             method: 'POST',
@@ -52,11 +64,13 @@ PandaBridge.init(function( ) {
         })
         .then(function(response) { return response.text(); })
         .then(function(resultText) {
+            console.log('Réponse Make.com:', resultText);
             status.textContent = 'Parcours reçu !';
             status.className = 'success';
             PandaBridge.send('onParcoursRecu', { parcours_json: resultText });
         })
         .catch(function(error) {
+            console.error('Erreur:', error);
             status.textContent = 'Erreur: ' + error.message;
             status.className = 'error';
             PandaBridge.send('onError', { error_message: error.message });
