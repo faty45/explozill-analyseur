@@ -1,53 +1,82 @@
-{
-  "version": "2.0.0",
-  "main": "",
-  "properties": [],
-  "events": [
-    {
-      "id": "onParcoursRecu",
-      "name": "Parcours received",
-      "locale_name": { "fr_FR": "Parcours reçu" },
-      "queryable": {
-        "parcours_json": "",
-        "__desc_parcours_json": {
-          "name": "Parcours JSON",
-          "locale_name": { "fr_FR": "Parcours JSON" }
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/pandasuite-bridge/lib/pandasuite-bridge.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
         }
-      }
-    },
-    {
-      "id": "onError",
-      "name": "Error occurred",
-      "locale_name": { "fr_FR": "Erreur survenue" },
-      "queryable": {
-        "error_message": "",
-        "__desc_error_message": {
-          "name": "Error message",
-          "locale_name": { "fr_FR": "Message d'erreur" }
-        }
-      }
-    }
-  ],
-  "actions": [
-    {
-      "id": "lancerAnalyse",
-      "name": "Start analysis",
-      "locale_name": { "fr_FR": "Lancer l'analyse" },
-      "params": [
-        { "id": "latitude", "name": "Latitude", "type": "String", "value": "" },
-        { "id": "longitude", "name": "Longitude", "type": "String", "value": "" },
-        { "id": "ville", "name": "City", "locale_name": { "fr_FR": "Ville" }, "type": "String", "value": "" },
-        { "id": "composition", "name": "Composition", "type": "String", "value": "" },
-        { "id": "duree", "name": "Duration", "locale_name": { "fr_FR": "Durée" }, "type": "String", "value": "" },
-        { "id": "mobilite", "name": "Mobility", "locale_name": { "fr_FR": "Mobilité" }, "type": "String", "value": "" },
-        { "id": "type_scenario", "name": "Scenario type", "locale_name": { "fr_FR": "Type scénario" }, "type": "String", "value": "" },
-        { "id": "pauses", "name": "Pauses", "type": "String", "value": "" },
-        { "id": "mood", "name": "Mood", "type": "String", "value": "" },
-        { "id": "nombre_personnes", "name": "Number of people", "locale_name": { "fr_FR": "Nombre personnes" }, "type": "String", "value": "" }
-      ]
-    }
-  ],
-  "resources": [],
-  "markers": [],
-  "synchronization": []
-}
+        #status { font-size: 12px; color: #666; text-align: center; padding: 5px; }
+        #status.loading { color: #f59e0b; }
+        #status.success { color: #10b981; }
+        #status.error { color: #ef4444; }
+    </style>
+</head>
+<body>
+<div id="status">En attente...</div>
+<script>
+var MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/fbnrw6wdqfu3yd2e0gkqha5qukf1jfas';
+var currentProps = {};
+
+PandaBridge.init(function( ) {
+    PandaBridge.onLoad(function(data) {
+        currentProps = data.properties || {};
+        console.log('Propriétés chargées:', JSON.stringify(currentProps));
+    });
+
+    PandaBridge.onUpdate(function(data) {
+        currentProps = data.properties || {};
+        console.log('Propriétés mises à jour:', JSON.stringify(currentProps));
+    });
+
+    PandaBridge.listen('lancerAnalyse', function() {
+        var status = document.getElementById('status');
+        status.textContent = 'Analyse en cours...';
+        status.className = 'loading';
+
+        var payload = {
+            latitude: currentProps.latitude || '',
+            longitude: currentProps.longitude || '',
+            ville: currentProps.ville || '',
+            composition: currentProps.composition || '',
+            duree: currentProps.duree || '',
+            mobilite: currentProps.mobilite || '',
+            type_scenario: currentProps.type_scenario || '',
+            pauses: currentProps.pauses || '',
+            mood: currentProps.mood || '',
+            nombre_personnes: currentProps.nombre_personnes || ''
+        };
+
+        console.log('Envoi vers Make.com:', JSON.stringify(payload));
+
+        fetch(MAKE_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(response) { return response.text(); })
+        .then(function(resultText) {
+            console.log('Réponse Make.com:', resultText);
+            status.textContent = 'Parcours reçu !';
+            status.className = 'success';
+            PandaBridge.send('onParcoursRecu', { parcours_json: resultText });
+        })
+        .catch(function(error) {
+            console.error('Erreur:', error);
+            status.textContent = 'Erreur: ' + error.message;
+            status.className = 'error';
+            PandaBridge.send('onError', { error_message: error.message });
+        });
+    });
+});
+</script>
+</body>
+</html>
