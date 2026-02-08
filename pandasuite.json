@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "main": "",
+  "properties": [],
+  "events": [
+    {
+      "id": "onParcoursRecu",
+      "name": "Parcours received",
+      "locale_name": { "fr_FR": "Parcours reçu" },
+      "queryable": {
+        "parcours_json": "",
+        "__desc_parcours_json": {
+          "name": "Parcours JSON",
+          "locale_name": { "fr_FR": "Parcours JSON" }
+        }
+      }
+    },
+    {
+      "id": "onError",
+      "name": "Error occurred",
+      "locale_name": { "fr_FR": "Erreur survenue" },
+      "queryable": {
+        "error_message": "",
+        "__desc_error_message": {
+          "name": "Error message",
+          "locale_name": { "fr_FR": "Message d'erreur" }
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "lancerAnalyse",
+      "name": "Start analysis",
+      "locale_name": { "fr_FR": "Lancer l'analyse" },
+      "params": [
+        { "id": "latitude", "name": "Latitude", "type": "String", "value": "" },
+        { "id": "longitude", "name": "Longitude", "type": "String", "value": "" },
+        { "id": "ville", "name": "City", "locale_name": { "fr_FR": "Ville" }, "type": "String", "value": "" },
+        { "id": "composition", "name": "Composition", "type": "String", "value": "" },
+        { "id": "duree", "name": "Duration", "locale_name": { "fr_FR": "Durée" }, "type": "String", "value": "" },
+        { "id": "mobilite", "name": "Mobility", "locale_name": { "fr_FR": "Mobilité" }, "type": "String", "value": "" },
+        { "id": "type_scenario", "name": "Scenario type", "locale_name": { "fr_FR": "Type scénario" }, "type": "String", "value": "" },
+        { "id": "pauses", "name": "Pauses", "type": "String", "value": "" },
+        { "id": "mood", "name": "Mood", "type": "String", "value": "" },
+        { "id": "nombre_personnes", "name": "Number of people", "locale_name": { "fr_FR": "Nombre personnes" }, "type": "String", "value": "" }
+      ]
+    }
+  ],
+  "resources": [],
+  "markers": [],
+  "synchronization": []
+}
